@@ -51,35 +51,5 @@ The program includes these key functions:
 - `rec_dlt_task()`: Recover deleted tasks.
 - `exit_page()`: Manage the exit process.
 
-## Example Output
-### Main Menu
-========== Welcome to Personal Task Management ==========
-
-(1) Add New Tasks
-
-(2) View All Tasks
-
-(3) Update Task
-
-(4) Delete Task Record
-
-(5) Recover Deleted Task
-
-(6) Exit Program
-
-
-Enter option: 
-
-### Adding a Task
-Enter Task Name: Complete Assignment
-
-Enter Due Date (DD/MM/YYYY): 27/11/2024
-
-Enter Category: Academic
-
-Enter Status (Pending/Completed): Pending
-
-Task added successfully.
-
 ## License
 This project is released under the MIT License.
