@@ -31,8 +31,9 @@ To compile and run this program, ensure you have the following:
 ## Usage Instructions
 ### Run the Program
 1. Clone this repository to your local system
-2. Open the project in Visual Studio Enterprise 2022.
-3. Build and run the project to start the Personal Task Management System.
+2. Open the project in Visual Studio Code.
+3. Run the Code using `Ctrl + Shift + N` to start the Personal Task Management System.
+4. Click PersonalTaskManagement.exe to use the Personal Task Management System.
 
 ## Implementation Details
 ### Programming Approach
