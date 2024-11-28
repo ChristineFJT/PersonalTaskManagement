@@ -457,34 +457,62 @@ void delete_task() {
     struct addtask task;
     int recordnum;
 
-    char type[]="view";
+    char type[] = "view";
     view_task(type);
 
-    FILE * f = fopen("line_task.txt", "r");
-    FILE * temp = fopen("temp.txt", "w");
-    FILE * dlt_task = fopen("dlt_task.txt", "a");
+    FILE *f = fopen("task.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
+    FILE *dlt_task = fopen("dlt_task.txt", "a");
+
+    if (!f || !temp || !dlt_task) {
+        printf("Error opening files.\n");
+        if (f) fclose(f);
+        if (temp) fclose(temp);
+        if (dlt_task) fclose(dlt_task);
+        return;
+    }
 
     printf("Enter Record No. to delete: ");
     scanf("%d", &recordnum);
-    
-    while(fgets(task.record, sizeof(task.record),f)) {
+
+    int current_line = 1;  // Track the line number in task.txt
+    int found = 0;
+
+    while (fgets(task.record, sizeof(task.record), f)) {
         sscanf(task.record, "%d;%[^;];%[^;];%[^;];%s", &task.current_line, task.taskname, task.duedate, task.cat, task.status);
-        
-        if(recordnum == task.current_line) {
-            printf("\nDelete -> Record No.: %d \nTaskname: %s \nDue Date: %s \nCategory: %s \nStatus: %s", task.current_line, task.taskname, task.duedate, task.cat, task.status);
-            fprintf(dlt_task,"%s;%s;%s;%s\n", task.taskname, task.duedate, task.cat, task.status); //add deleted task taskname to dlt_task file
-            printf("\nDelete Successfully!!\n\n");
-            continue;
-        }               
-        fprintf(temp,"%s;%s;%s;%s\n", task.taskname, task.duedate, task.cat, task.status); //update new taskname to temp file
-     
+
+        // If the task is the one to delete
+        if (recordnum == task.current_line) {
+            printf("\nDelete -> Record No.: %d\nTaskname: %s\nDue Date: %s\nCategory: %s\nStatus: %s\n",
+                   task.current_line, task.taskname, task.duedate, task.cat, task.status);
+
+            // Write the task to dlt_task.txt with the current line number
+            fprintf(dlt_task, "%d;%s;%s;%s;%s\n", current_line, task.taskname, task.duedate, task.cat, task.status);
+            found = 1;
+        } else {
+            // Write the task to temp.txt with updated line numbers
+            fprintf(temp, "%d;%s;%s;%s;%s\n", current_line, task.taskname, task.duedate, task.cat, task.status);
+        }
+
+        // Increment the line number for the next task
+        current_line++;
     }
-    fclose(temp);
+
     fclose(f);
+    fclose(temp);
     fclose(dlt_task);
-    remove("task.txt");
-    rename("temp.txt", "task.txt");    
+
+    if (found) {
+        // Replace the old task.txt with the updated temp.txt
+        remove("task.txt");
+        rename("temp.txt", "task.txt");
+        printf("Task deleted successfully.\n");
+    } else {
+        remove("temp.txt");
+        printf("No task found with the given record number.\n");
+    }
 }
+
 
 void view_task(char *type) {
     struct addtask tk = {0};  // Initialize structure to zero
@@ -536,149 +564,117 @@ void view_task(char *type) {
     fclose(file);
 }
 
-
-
 void view_rec_dlt_task_with_line_num() {
     struct addtask task;
     int times = 136;
     int j, k;
-    int current_line = 1;
-    FILE *file, *f;
-    char buffer[MAX_LINE];
-    
-    file = fopen("dlt_task.txt", "r");
-    if (file == NULL) {
+
+    FILE *f = fopen("dlt_task.txt", "r");
+    if (!f) {
         printf("Error opening dlt_task.txt file.\n");
         return;
     }
 
-    // Create temp file with line numbers
-    FILE *temp = fopen("line_dlt_task.txt", "w");
-    if (temp == NULL) {
-        printf("Error opening temp file.\n");
-        fclose(file);
-        return;
-    }
-
-    while (fgets(buffer, MAX_LINE, file) != NULL) {
-        fprintf(temp, "%d;%s", current_line, buffer);
-        current_line++;
-    }
-
-    fclose(temp);
-    fclose(file);
-
-    // Display deleted tasks
-    f = fopen("line_dlt_task.txt", "r");
-    if (f == NULL) {
-        printf("Error opening line_dlt_task.txt file.\n");
-        return;
-    }
-
     printf("\nThese are the deleted records\n");
-    for(j = 0; j < times; ++j) {
+    for (j = 0; j < times; ++j) {
         printf("=");
     }
     printf("\n    Record No.    |\t\t     Taskname     \t\t|\tDue Date\t|\tCategory\t|\t Status \t\n");
-    for(k = 0; k < times; ++k) {
+    for (k = 0; k < times; ++k) {
         printf("=");
     }
     printf("\n");
 
     while (fgets(task.record, sizeof(task.record), f)) {
         sscanf(task.record, "%d;%[^;];%[^;];%[^;];%s", &task.current_line, task.taskname, task.duedate, task.cat, task.status);
-        printf("\t%d \t  |\t   %26s   \t|\t%s\t|%17s\t|%17s\n", task.current_line, task.taskname, task.duedate, task.cat, task.status);
+        printf("\t%d \t  |\t   %26s   \t|\t%s\t|%17s\t|%17s\n",
+               task.current_line, task.taskname, task.duedate, task.cat, task.status);
     }
 
     fclose(f);
 }
+
 
 // Function to recover deleted tasks
 void rec_dlt_task() {
     struct addtask task;
     int recordnum;
 
-    // View deleted tasks
-    view_rec_dlt_task_with_line_num();
+    view_rec_dlt_task_with_line_num();  // Display deleted tasks with line numbers
 
-    // Open dlt_task.txt for reading, line_dlt_task.txt for reading, and task.txt & line_task.txt for updating
-    FILE *f = fopen("line_dlt_task.txt", "r");
+    FILE *f = fopen("dlt_task.txt", "r");
     FILE *temp_dlt = fopen("temp_dlt.txt", "w");
-    FILE *rec_task = fopen("task.txt", "a");  // Open task.txt in append mode
-    FILE *rec_line_task = fopen("line_task.txt", "a");  // Open line_task.txt in append mode
+    FILE *rec_task = fopen("task.txt", "a+");
 
-    if (!f || !temp_dlt || !rec_task || !rec_line_task) {
-        printf("Error opening file.\n");
+    if (!f || !temp_dlt || !rec_task) {
+        printf("Error opening files.\n");
+        if (f) fclose(f);
+        if (temp_dlt) fclose(temp_dlt);
+        if (rec_task) fclose(rec_task);
         return;
     }
 
-    // Ask user for the record number to recover
     printf("Enter Record No. to recover: ");
     scanf("%d", &recordnum);
 
-    int recovered = 0;  // To check if the task is found and recovered
-
-    // Iterate through deleted tasks in line_dlt_task.txt
+    int found = 0;
     while (fgets(task.record, sizeof(task.record), f)) {
         sscanf(task.record, "%d;%[^;];%[^;];%[^;];%s", &task.current_line, task.taskname, task.duedate, task.cat, task.status);
 
-        // If the task matches the record number to recover
         if (recordnum == task.current_line) {
-            printf("\nTask recovered -> Record No.: %d \nTaskname: %s \nDue Date: %s \nCategory: %s \nStatus: %s\n", 
+            printf("\nTask recovered -> Record No.: %d\nTaskname: %s\nDue Date: %s\nCategory: %s\nStatus: %s\n",
                    task.current_line, task.taskname, task.duedate, task.cat, task.status);
 
-            // Recover the task by adding it back to task.txt and line_task.txt
-            fprintf(rec_task, "%s;%s;%s;%s\n", task.taskname, task.duedate, task.cat, task.status);
-            fprintf(rec_line_task, "%d;%s;%s;%s;%s\n", task.current_line, task.taskname, task.duedate, task.cat, task.status);
-
-            recovered = 1;  // Mark task as recovered
-            continue; // Skip writing to temp_dlt file as it's deleted
+            // Temporarily add the task to task.txt with a dummy line number
+            fprintf(rec_task, "0;%s;%s;%s;%s\n", task.taskname, task.duedate, task.cat, task.status);
+            found = 1;
+        } else {
+            // Write remaining tasks to temp_dlt.txt
+            fprintf(temp_dlt, "%d;%s;%s;%s;%s\n", task.current_line, task.taskname, task.duedate, task.cat, task.status);
         }
-
-        // If task is not the one to recover, write it to temp_dlt.txt
-        fprintf(temp_dlt, "%d;%s;%s;%s;%s\n", task.current_line, task.taskname, task.duedate, task.cat, task.status);
     }
 
-    // Close files
     fclose(f);
     fclose(temp_dlt);
     fclose(rec_task);
-    fclose(rec_line_task);
 
-    // If no task was recovered, inform the user
-    if (!recovered) {
+    if (!found) {
+        remove("temp_dlt.txt");
         printf("No task found with the given record number.\n");
         return;
     }
 
-    // Remove dlt_task.txt and line_dlt_task.txt and rename temp_dlt.txt back to dlt_task.txt
-    remove("line_dlt_task.txt");
-    rename("temp_dlt.txt", "line_dlt_task.txt");
+    // Rename temp_dlt.txt to dlt_task.txt
+    remove("dlt_task.txt");
+    rename("temp_dlt.txt", "dlt_task.txt");
 
-    // Also remove the task from dlt_task.txt
-    FILE *dlt_file = fopen("dlt_task.txt", "r");
-    FILE *temp_dlt_file = fopen("temp_dlt_file.txt", "w");
-    
-    if (dlt_file && temp_dlt_file) {
-        while (fgets(task.record, sizeof(task.record), dlt_file)) {
-            sscanf(task.record, "%d;%[^;];%[^;];%[^;];%s", &task.current_line, task.taskname, task.duedate, task.cat, task.status);
-            
-            // Only write tasks that were not recovered
-            if (task.current_line != recordnum) {
-                fprintf(temp_dlt_file, "%d;%s;%s;%s;%s\n", task.current_line, task.taskname, task.duedate, task.cat, task.status);
-            }
-        }
-        fclose(dlt_file);
-        fclose(temp_dlt_file);
-        
-        // Replace the old dlt_task.txt with the new one
-        remove("dlt_task.txt");
-        rename("temp_dlt_file.txt", "dlt_task.txt");
-    } else {
-        printf("Error handling dlt_task.txt during recovery.\n");
+    // Renumber task.txt
+    FILE *task_file = fopen("task.txt", "r");
+    FILE *temp_task = fopen("temp_task.txt", "w");
+    if (!task_file || !temp_task) {
+        printf("Error renumbering tasks.\n");
+        if (task_file) fclose(task_file);
+        if (temp_task) fclose(temp_task);
+        return;
     }
 
-    printf("Task recovered successfully.\n");
+    int current_line = 1;
+    while (fgets(task.record, sizeof(task.record), task_file)) {
+        sscanf(task.record, "%d;%[^;];%[^;];%[^;];%s", &task.current_line, task.taskname, task.duedate, task.cat, task.status);
+
+        // Assign new line number and write to temp_task.txt
+        fprintf(temp_task, "%d;%s;%s;%s;%s\n", current_line, task.taskname, task.duedate, task.cat, task.status);
+        current_line++;
+    }
+
+    fclose(task_file);
+    fclose(temp_task);
+
+    // Replace the original task.txt with the renumbered version
+    remove("task.txt");
+    rename("temp_task.txt", "task.txt");
+
+    printf("Task recovered successfully, and line numbers updated.\n");
 }
 
 void exit_page() {
