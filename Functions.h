@@ -156,7 +156,7 @@ void asc_sorting() {
 
     // Open files
     FILE *ft = fopen("task.txt", "r");
-    FILE *fw = fopen("asctask.txt", "w");
+    FILE *fw = fopen("asc_task.txt", "w");
     if (!ft || !fw) {
         perror("Error opening file");
         if (ft) fclose(ft);
@@ -187,7 +187,7 @@ void asc_sorting() {
         }
     }
 
-    // Write sorted tasks to asctask.txt with updated line numbers
+    // Write sorted tasks to asc_task.txt with updated line numbers
     for (i = 0; i < count_lines; i++) {
         fprintf(fw, "%d;%s;%02d/%02d/%04d;%s;%s\n", 
                 i + 1, // New line number based on the sorted order
@@ -200,9 +200,9 @@ void asc_sorting() {
     fclose(fw);
 
     // Display sorted tasks
-    printf("\nTasks sorted in ascending order by date have been written to 'asctask.txt' with updated line numbers.\n");
+    printf("\nTasks sorted in ascending order by date have been written to 'asc_task.txt' with updated line numbers.\n");
     char type[] = "asc";
-    view_task(type); // Assuming view_task can read and display asctask.txt
+    view_task(type); // Assuming view_task can read and display asc_task.txt
 }
 
 
@@ -213,7 +213,7 @@ void desc_sorting() {
 
     // Open files
     FILE *ft = fopen("task.txt", "r");
-    FILE *fw = fopen("desctask.txt", "w");
+    FILE *fw = fopen("desc_task.txt", "w");
     if (!ft || !fw) {
         perror("Error opening file");
         if (ft) fclose(ft);
@@ -244,7 +244,7 @@ void desc_sorting() {
         }
     }
 
-    // Write sorted tasks to desctask.txt with updated line numbers
+    // Write sorted tasks to desc_task.txt with updated line numbers
     for (i = 0; i < count_lines; i++) {
         fprintf(fw, "%d;%s;%02d/%02d/%04d;%s;%s\n", 
                 i + 1, // New line number based on the sorted order
@@ -257,9 +257,9 @@ void desc_sorting() {
     fclose(fw);
 
     // Display sorted tasks
-    printf("\nTasks sorted in descending order by date have been written to 'desctask.txt' with updated line numbers.\n");
+    printf("\nTasks sorted in descending order by date have been written to 'desc_task.txt' with updated line numbers.\n");
     char type[] = "desc";
-    view_task(type); // Assuming view_task can read and display desctask.txt
+    view_task(type); // Assuming view_task can read and display desc_task.txt
 }
 
 void sort_selection() {
@@ -526,9 +526,9 @@ void view_task(char *type) {
 
     // Determine which file to read based on the type
     if (strcmp(type, type1) == 0) {
-        filename = "asctask.txt";
+        filename = "asc_task.txt";
     } else if (strcmp(type, type2) == 0) {
-        filename = "desctask.txt";
+        filename = "desc_task.txt";
     } else if (strcmp(type, type3) == 0) {
         filename = "task.txt";
     } else {
